@@ -1,0 +1,9 @@
+/* static/style.css */
+body {
+    background-color: #e0f7fa; /* 淡藍色背景 */
+    font-family: sans-serif;
+}
+
+h1 {
+    color: #00796b; /* 深青色文字 */
+}

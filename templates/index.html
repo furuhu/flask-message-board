@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ the_title }}{% endblock %}
+
+{% block head %}
+    <style>
+        .messages ul { list-style: none; padding-left: 0; }
+        .messages li { background-color: #ffffff; margin-bottom: 10px; padding: 10px; border-radius: 5px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .message-content { flex-grow: 1; margin-right: 10px; }
+        .message-meta { font-size: 0.8em; color: #555; }
+        .error { color: red; font-size: 0.9em; margin-left: 5px; }
+        .delete-button { background-color: #f44336; color: white; border: none; padding: 3px 8px; cursor: pointer; font-size: 0.9em; border-radius: 3px; flex-shrink: 0; }
+        .delete-button:hover { background-color: #da190b; }
+        .flashes { list-style: none; padding: 10px; margin-bottom: 15px; }
+        .alert { padding: 10px; margin-bottom: 10px; border: 1px solid transparent; border-radius: 4px; }
+        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+        .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+        .alert-info { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ the_title }}</h1>
+    <p>目前登入使用者: <strong>{{ g.user.username if g.user else '訪客' }}</strong></p>
+    <p>目前時間: {{ current_time }}</p>
+
+    <hr>
+
+    {# --- 修改：只有登入使用者才能看到留言表單 --- #}
+    {% if g.user %} {# 檢查 g.user 是否存在 #}
+        <h2>留下訊息：</h2>
+        <form method="POST" action="{{ url_for('index') }}">
+            {{ form.csrf_token }}
+            <p>
+                {{ form.content.label }}<br>
+                {{ form.content(size=40) }}
+                {% if form.content.errors %}
+                    {% for error in form.content.errors %}
+                        <span class="error">[{{ error }}]</span>
+                    {% endfor %}
+                {% endif %}
+            </p>
+            <p>{{ form.submit() }}</p>
+        </form>
+        <hr>
+    {% else %} {# 如果未登入，顯示提示訊息 #}
+        <p>請 <a href="{{ url_for('login') }}">登入</a> 或 <a href="{{ url_for('register') }}">註冊</a> 以留下訊息。</p>
+        <hr>
+    {% endif %}
+    {# --- 留言表單區塊結束 --- #}
+
+
+    <h2>已儲存的訊息：</h2>
+    <div class="messages">
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>
+                        <div class="message-content">
+                            {{ message['content'] }}
+                            {# --- 修改：顯示留言者名稱和時間 --- #}
+                            <span class="message-meta">
+                                由 <strong>{{ message['username'] }}</strong>
+                                於 {{ message['created'] }} 發布
+                            </span>
+                        </div>
+                        {# --- 修改：只有訊息擁有者才能看到刪除按鈕 --- #}
+                        {# 1. 檢查使用者是否登入 (g.user 存在) #}
+                        {# 2. 檢查登入使用者的 ID 是否等於這條訊息的 user_id #}
+                        {% if g.user and g.user.id == message.user_id %}
+                            <form method="POST" action="{{ url_for('delete', message_id=message['id']) }}" style="display: inline;">
+                                <button type="submit" class="delete-button"
+                                        onclick="return confirm('你確定要刪除這則訊息嗎？');">
+                                    刪除
+                                </button>
+                            </form>
+                        {% endif %}
+                        {# --- 刪除按鈕條件結束 --- #}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>目前沒有任何訊息。</p>
+        {% endif %}
+    </div>
+
+    {# 功能列表暫時移除 #}
+
+{% endblock %}

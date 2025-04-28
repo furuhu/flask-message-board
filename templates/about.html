@@ -1,0 +1,13 @@
+{% extends "base.html" %} {# 繼承 base.html #}
+
+{# 覆寫 'title' 區塊 #}
+{% block title %}{{ the_title }}{% endblock %}
+
+{# 這個頁面沒有額外的 head 內容，所以不需要覆寫 head 區塊 #}
+
+{# 覆寫 'content' 區塊 #}
+{% block content %}
+    <h1>關於這個應用程式</h1>
+    <p>這是一個一步一步建立的簡單 Flask 應用程式範例。</p>
+    {# 導覽連結已經移到 base.html 了 #}
+{% endblock %}

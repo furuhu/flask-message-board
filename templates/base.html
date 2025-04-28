@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Flask App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* 加入 Flash 訊息的基本樣式 */
+        .flashes { list-style: none; padding: 10px; margin-bottom: 15px; }
+        .alert { padding: 10px; margin-bottom: 10px; border: 1px solid transparent; border-radius: 4px; }
+        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; } /* 綠色成功 */
+        .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; } /* 紅色危險/錯誤 */
+        .alert-info { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; } /* 藍色資訊 */
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">首頁</a> |
+        <a href="{{ url_for('about') }}">關於</a> |
+        {# --- 根據登入狀態顯示不同連結 --- #}
+        {% if g.user %} {# g.user 是在 app.py 的 before_request 中設定的 #}
+            <span>已登入為：{{ g.user.username }}</span> | {# 顯示使用者名稱 #}
+            <a href="{{ url_for('logout') }}">登出</a> {# 顯示登出連結 #}
+        {% else %}
+            <a href="{{ url_for('login') }}">登入</a> | {# 顯示登入連結 #}
+            <a href="{{ url_for('register') }}">註冊</a> {# 顯示註冊連結 #}
+        {% endif %}
+        {# --- 條件連結結束 --- #}
+    </nav>
+    <hr>
+
+    {# --- 顯示 Flash 訊息區塊 --- #}
+    {# get_flashed_messages() 會取得所有 flash 訊息 #}
+    {# with_categories=true 會同時取得訊息分類 (例如 'success', 'danger') #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %} {# 如果有 flash 訊息 #}
+            <div class="flashes">
+            {% for category, message in messages %} {# 遍歷所有訊息及其分類 #}
+                {# 使用分類來設定 CSS class (alert-success, alert-danger 等) #}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+            <hr> {# 在 flash 訊息下方加分隔線 #}
+        {% endif %}
+    {% endwith %}
+    {# --- Flash 訊息區塊結束 --- #}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <hr>
+
+    <footer>
+        <p>一步一步學習 Flask！</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+{% extends "base.html" %} {# 繼承基礎佈局 #}
+
+{% block title %}登入{% endblock %} {# 設定頁面標題 #}
+
+{% block content %} {# 填寫主要內容區塊 #}
+    <h2>登入</h2>
+    {# 使用 POST 方法提交到 login 路由 #}
+    <form method="POST" action="{{ url_for('login') }}">
+        {{ form.csrf_token }} {# 必須包含 CSRF token #}
+
+        {# 顯示使用者名稱欄位、標籤及錯誤 #}
+        <p>
+            {{ form.username.label }}<br>
+            {{ form.username(size=30) }}<br>
+            {% for error in form.username.errors %}
+                <span class="error">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+
+        {# 顯示密碼欄位、標籤及錯誤 #}
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=30) }}<br>
+            {% for error in form.password.errors %}
+                <span class="error">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+
+        {# 可選的記住我功能 (在此範例中未實作效果) #}
+        {# <p>{{ form.remember() }} {{ form.remember.label }}</p> #}
+
+        {# 顯示提交按鈕 #}
+        <p>{{ form.submit() }}</p>
+    </form>
+    <p>還沒有帳號？ <a href="{{ url_for('register') }}">點此註冊</a></p>
+{% endblock %}
