@@ -21,14 +21,13 @@
 
 {% block content %}
     <h1>{{ the_title }}</h1>
-    <p>目前登入使用者: <strong>{{ g.user.username if g.user else '訪客' }}</strong></p>
-    <p>目前時間: {{ current_time }}</p>
+    <p>Currently logged in user: <strong>{{ g.user.username if g.user else 'Guest' }}</strong></p>
+    <p>Current time: {{ current_time }}</p>
 
     <hr>
 
-    {# --- 修改：只有登入使用者才能看到留言表單 --- #}
-    {% if g.user %} {# 檢查 g.user 是否存在 #}
-        <h2>留下訊息：</h2>
+    {% if g.user %}
+        <h2>Leave a Message:</h2>
         <form method="POST" action="{{ url_for('index') }}">
             {{ form.csrf_token }}
             <p>
@@ -43,47 +42,43 @@
             <p>{{ form.submit() }}</p>
         </form>
         <hr>
-    {% else %} {# 如果未登入，顯示提示訊息 #}
-        <p>請 <a href="{{ url_for('login') }}">登入</a> 或 <a href="{{ url_for('register') }}">註冊</a> 以留下訊息。</p>
+    {% else %}
+        <p>Please <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">register</a> to leave a message.</p>
         <hr>
     {% endif %}
-    {# --- 留言表單區塊結束 --- #}
 
 
-    <h2>已儲存的訊息：</h2>
+    <h2>Saved Messages:</h2>
     <div class="messages">
         {% if messages %}
             <ul>
+                {# messages 現在是 Message 物件的列表 #}
                 {% for message in messages %}
                     <li>
                         <div class="message-content">
-                            {{ message['content'] }}
-                            {# --- 修改：顯示留言者名稱和時間 --- #}
+                            {{ message.content }} {# 直接存取 Message 物件的 content 屬性 #}
                             <span class="message-meta">
-                                由 <strong>{{ message['username'] }}</strong>
-                                於 {{ message['created'] }} 發布
+                                {# 透過 backref='author' 存取關聯的 User 物件的 username 屬性 #}
+                                by <strong>{{ message.author.username }}</strong>
+                                {# 存取 Message 物件的 created 屬性 #}
+                                on {{ message.created.strftime('%Y-%m-%d %H:%M:%S') }} {# 格式化時間 #}
                             </span>
                         </div>
-                        {# --- 修改：只有訊息擁有者才能看到刪除按鈕 --- #}
-                        {# 1. 檢查使用者是否登入 (g.user 存在) #}
-                        {# 2. 檢查登入使用者的 ID 是否等於這條訊息的 user_id #}
-                        {% if g.user and g.user.id == message.user_id %}
-                            <form method="POST" action="{{ url_for('delete', message_id=message['id']) }}" style="display: inline;">
+                        {# 檢查擁有權：比較 g.user (User 物件) 和 message.author (User 物件) #}
+                        {% if g.user and g.user == message.author %}
+                            <form method="POST" action="{{ url_for('delete', message_id=message.id) }}" style="display: inline;">
                                 <button type="submit" class="delete-button"
-                                        onclick="return confirm('你確定要刪除這則訊息嗎？');">
-                                    刪除
+                                        onclick="return confirm('Are you sure you want to delete this message?');">
+                                    Delete
                                 </button>
                             </form>
                         {% endif %}
-                        {# --- 刪除按鈕條件結束 --- #}
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>目前沒有任何訊息。</p>
+            <p>No messages yet.</p>
         {% endif %}
     </div>
-
-    {# 功能列表暫時移除 #}
 
 {% endblock %}
